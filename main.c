@@ -39,7 +39,7 @@ int WAVECheck(FILE *File){
 	uint8_t result;
 	char buffer[4];
 	fread(buffer,sizeof(char),4,File);
-	char *WAVEId = "WAVE"
+	char *WAVEId = "WAVE";
 	result = !strcmp(buffer,WAVEId);
 
 	return result;
