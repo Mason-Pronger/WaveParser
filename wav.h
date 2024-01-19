@@ -23,4 +23,5 @@ typedef struct WAV{
 
 int RiffCheck(FILE *File);   //Read the first 4 bytes of the file to check if the file being read is a wav
 int FileSize(FILE *File);   // Offset the reading of the file by 4 bytes
+int WAVECheck(FILE *File);
 //int openwave(void *File, wave *header);

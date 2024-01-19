@@ -35,6 +35,15 @@ int FileSize(FILE *File){
     printf("%d\n", res);
 
 }
+int WAVECheck(FILE *File){
+	uint8_t result;
+	char buffer[4];
+	fread(buffer,sizeof(char),4,File);
+	char *WAVEId = "WAVE"
+	result = !strcmp(buffer,WAVEId);
+
+	return result;
+}
 /*
 int openwave(void *File, wave *header){
     int read = 0;
@@ -61,8 +70,9 @@ int main(int argc, char const *argv[])
     }else{
         printf("successfully opened file\n");
         if(RiffCheck(fptr)){
-            printf("Identified wave file\n");
-            FileSize(fptr);
+            	printf("Identified wave file\n");
+            	FileSize(fptr);
+		WAVECheck(fptr);	
             //openwave(fptr,&header);
         }else{
             printf("Unable to identify the file");
