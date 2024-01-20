@@ -7,7 +7,7 @@ int main(int argc, char const *argv[])
     FILE *fptr;
     wave header;
 
-    fptr = fopen("Crunch_It_Girl.wav","rb");
+    fptr = fopen("ITGIRL.wav","rb");
 
     if(fptr == NULL){
         printf("Unable to open file\n");
@@ -16,7 +16,7 @@ int main(int argc, char const *argv[])
         printf("successfully opened file\n");
         if(RiffCheck(fptr,&header)){
             	printf("Identified wave file\n");
-            	FileSize(fptr,&header);
+            	ChunkSize(fptr,&header);
 		        WAVECheck(fptr,&header);
             //openwave(fptr,&header);
         }else{
