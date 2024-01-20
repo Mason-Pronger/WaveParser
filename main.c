@@ -4,20 +4,24 @@
 #include <string.h>
 #include <stdint.h>
 
-int RiffCheck(FILE *File){
+int RiffCheck(FILE *File,wave *wav){
     	int result = 0;
     
     	char buffer[4];
     	fread(buffer,sizeof(char),4,File);
 	    char *ChunkId = "RIFF";
 
-    	result = !strcmp(buffer,ChunkId);
+    	result = strcmp(buffer,ChunkId);
 
-    	return result;
+        memcpy(wav->ChunkID,buffer,sizeof(char)*4);
+        wav->ChunkID[5] = '\0';
+
+    	return !result;
 }
 
-int FileSize(FILE *File){
+int FileSize(FILE *File, wave *wav){
 	//Offset for the chunk size
+    uint8_t result = 0; //Assume the final result is false
 
 	char buffer[4];
 	fread(buffer,sizeof(char),4,File);
@@ -32,17 +36,27 @@ int FileSize(FILE *File){
 
     res = b0 | b1 | b2 | b3;
 
-    printf("%d\n", res);
+    wav->ChunkSize = res;
 
+    return (result != 0);
 }
-int WAVECheck(FILE *File){
+int WAVECheck(FILE *File, wave *wav){
 	uint8_t result;
 	char buffer[4];
 	fread(buffer,sizeof(char),4,File);
 	char *WAVEId = "WAVE";
-	result = !strcmp(buffer,WAVEId);
+	result = strcmp(buffer,WAVEId);
 
-	return result;
+    memcpy(wav->Format,buffer,4*sizeof(char));
+    wav->Format[5] = '\0';
+
+	return !result;
+}
+
+void WaveInformation(wave *wav, FILE *out){
+    if(out == NULL){
+        fprintf(stdout,"Chunk Id:%-8s\nChunk Size:%-8d\nFormat:%-8s\n",wav->ChunkID,wav->ChunkSize,wav->Format);
+    }
 }
 /*
 int openwave(void *File, wave *header){
@@ -69,17 +83,18 @@ int main(int argc, char const *argv[])
 
     }else{
         printf("successfully opened file\n");
-        if(RiffCheck(fptr)){
+        if(RiffCheck(fptr,&header)){
             	printf("Identified wave file\n");
-            	FileSize(fptr);
-		WAVECheck(fptr);	
+            	FileSize(fptr,&header);
+		        WAVECheck(fptr,&header);
             //openwave(fptr,&header);
         }else{
-            printf("Unable to identify the file");
+            printf("Unable to identify the file\n");
         }
 
     }
     
+    WaveInformation(&header,NULL);
     fclose(fptr);
     printf("***Program is compleate***");
     return 0;
