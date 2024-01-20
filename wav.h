@@ -3,9 +3,9 @@
 #include <stdlib.h>
 
 typedef struct WAV{ 
-    char ChunkID[4];    //The wave format spec says that chunkid is 4 bytes. However I need a null terminator char to print this value correctly
-    char ChunkSize[4];
-    char Format[4];     //Much like the ChunkId explanation, I need a null terminator character.
+    unsigned char ChunkID[4];    //The wave format spec says that chunkid is 4 bytes. However I need a null terminator char to print this value correctly
+    unsigned char ChunkSize[4];
+    unsigned char Format[4];     //Much like the ChunkId explanation, I need a null terminator character.
     char Subchunk1Id[4];
     char Subchunk1Size[4];
     char AudioFormat[2];

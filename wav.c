@@ -4,28 +4,38 @@
 #include <string.h>
 #include <stdint.h>
 
-int PrintProper(char *incoming,char *destination,uint8_t size){
+/*  This function does not work yet do not use.
+int PrintProper(char *incoming,char **destination,uint8_t size){
     uint8_t result = 0;
-
     char buffer[size];
+
     strncpy(buffer,incoming,DescriptorSize);
-    buffer[size-1] = '\0';
-    destination = buffer;
+    buffer[size] = '\0';
+    *destination = buffer;
 
     result = destination != NULL;
 
     return result;
 }
+*/
 
 //Reverse the order of the endian
-uint32_t ReverseEndian(void *data,int size){
-    uint32_t *Reversed;
-    for(int i = 0;i < size;i++){
-        --Reversed;
-        *Reversed = *(uint32_t*)data;
-        data++;
-    }
-    return *Reversed;
+uint32_t ReverseEndian(unsigned char *data,int size){
+    //This needs to be cleaned up and tested
+    uint32_t Reversed;
+    printf("%x\n",data[0]);
+    printf("%x\n",data[1]<<8);
+    printf("%x\n",data[2]<<16);
+    printf("%x\n",data[3]<<24);
+
+    Reversed = ((data[0])) | // move byte 3 to byte 0
+                    ((data[1]<<8)) | // move byte 1 to byte 2
+                    ((data[2]<<16)) | // move byte 2 to byte 1
+                    ((data[3]<<24)); // byte 0 to byte 3
+
+    printf("%u\n",Reversed);
+    //Incorrect output for 0x0027A612
+    return Reversed;
 }
 
 int RiffCheck(FILE *File,wave *wav){
@@ -47,7 +57,8 @@ int ChunkSize(FILE *File, wave *wav){
     uint8_t result = 0; //Assume the final result is false
 	char buffer[4];
 	result = fread(buffer,sizeof(char),4,File);
-    memcpy(wav->ChunkSize,buffer,sizeof(char));
+
+    memcpy(wav->ChunkSize,buffer,sizeof(char)*DescriptorSize);
     
     return (result != 0);
 }
@@ -65,16 +76,15 @@ int WAVECheck(FILE *File, wave *wav){
 }
 
 void WaveInformation(wave *wav, FILE *out){
-    char *ChunkId=NULL,*Format=NULL;
+    //char *ChunkId=NULL,*Format=NULL;
     uint32_t ChunkSize;
-    PrintProper(wav->ChunkID,ChunkId,DescriptorSize);
-    PrintProper(wav->Format,Format,DescriptorSize);
+    //PrintProper(wav->ChunkID,&ChunkId,DescriptorSize);
+    //PrintProper(wav->Format,&Format,DescriptorSize);
     ChunkSize = ReverseEndian(wav->ChunkSize,DescriptorSize);
-    printf("here\n");
 
     if(out == NULL){
-        printf("here2\n");
-        fprintf(stdout,"Chunk Id:%-8s\nChunk Size:%-8d\nFormat:%-8s\n",ChunkId,ChunkSize,Format);
+        //fprintf(stdout,"Chunk Id:%-8s\nChunk Size:%-8d\nFormat:%-8s\n",ChunkId,ChunkSize,Format);
+        printf("%u\n",ChunkSize);
     }
 }
 /*

@@ -18,14 +18,15 @@ int main(int argc, char const *argv[])
             	printf("Identified wave file\n");
             	ChunkSize(fptr,&header);
 		        WAVECheck(fptr,&header);
-            //openwave(fptr,&header);
+                //openwave(fptr,&header);
+                WaveInformation(&header,NULL);
         }else{
             printf("Unable to identify the file\n");
         }
 
     }
     
-    WaveInformation(&header,NULL);
+
     fclose(fptr);
     printf("***Program is compleate***");
     return 0;
