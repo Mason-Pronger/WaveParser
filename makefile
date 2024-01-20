@@ -1,6 +1,13 @@
-Wave: main.c wav.h
-	echo "Hello world"
-	gcc -Wall main.c wav.h -o wave
+CC = gcc
+CFLAGS = -Wall
+
+
+#	Program files
+test: test.o wav.o
+#	Object files
+test.o: test.c wav.h
+
+wave.o: wav.c wav.h
 
 clean:
-	rm *.gch *.exe
+	rm *.exe *.o
