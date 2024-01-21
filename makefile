@@ -1,9 +1,12 @@
 CC = gcc
 CFLAGS = -Wall -g
 
+Default: test
 
+all: test
 #	Program files
 test: test.o wav.o
+
 #	Object files
 test.o: test.c wav.h
 

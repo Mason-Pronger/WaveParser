@@ -20,34 +20,28 @@ int PrintProper(char *incoming,char **destination,uint8_t size){
 */
 
 //Reverse the order of the endian
-uint32_t ReverseEndian(unsigned char *data,int size){
+uint32_t ReverseEndian(uint32_t *data,int size){
     //This needs to be cleaned up and tested
     uint32_t Reversed;
-    printf("%x\n",data[0]);
-    printf("%x\n",data[1]<<8);
-    printf("%x\n",data[2]<<16);
-    printf("%x\n",data[3]<<24);
 
-    Reversed = ((data[0])) | // move byte 3 to byte 0
-                    ((data[1]<<8)) | // move byte 1 to byte 2
-                    ((data[2]<<16)) | // move byte 2 to byte 1
-                    ((data[3]<<24)); // byte 0 to byte 3
+    Reversed =  ((*data>>24)&0xff) | // move byte 3 to byte 0
+                    ((*data<<8)&0xff0000) | // move byte 1 to byte 2
+                    ((*data>>8)&0xff00) | // move byte 2 to byte 1
+                    ((*data<<24)&0xff000000); // byte 0 to byte 3
 
-    printf("%u\n",Reversed);
-    //Incorrect output for 0x0027A612
     return Reversed;
 }
 
 int RiffCheck(FILE *File,wave *wav){
     	int result = 0;
     
-    	char buffer[4];
-    	fread(buffer,sizeof(char),DescriptorSize,File);
-	    char *ChunkId = "RIFF";
+    	uint32_t buffer;
+    	fread(&buffer,sizeof(char),DescriptorSize,File);
+	    uint32_t ChunkId = 0x52494646;
 
-    	result = !strncmp(buffer,ChunkId,DescriptorSize);
+    	result = buffer == ChunkId;//!strncmp(buffer,ChunkId,DescriptorSize);
 
-        memcpy(wav->ChunkID,buffer,sizeof(char)*DescriptorSize);
+        memcpy(wav->ChunkID,buffer,DescriptorSize);
 
     	return result;
 }

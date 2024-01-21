@@ -7,27 +7,32 @@ int main(int argc, char const *argv[])
     FILE *fptr;
     wave header;
 
-    fptr = fopen("ITGIRL.wav","rb");
+    if(argc > 0){
+        fptr = fopen(argv[1],"rb");
 
-    if(fptr == NULL){
-        printf("Unable to open file\n");
+        if(fptr == NULL){
+            printf("Unable to open file\n");
 
-    }else{
-        printf("successfully opened file\n");
-        if(RiffCheck(fptr,&header)){
-            	printf("Identified wave file\n");
-            	ChunkSize(fptr,&header);
-		        WAVECheck(fptr,&header);
-                //openwave(fptr,&header);
-                WaveInformation(&header,NULL);
         }else{
-            printf("Unable to identify the file\n");
-        }
+            printf("successfully opened file\n");
+            if(RiffCheck(fptr,&header)){
+                    printf("Identified wave file\n");
+                    ChunkSize(fptr,&header);
+                    WAVECheck(fptr,&header);
+                    //openwave(fptr,&header);
+                    WaveInformation(&header,NULL);
+            }else{
+                printf("Unable to identify the file\n");
+            }
 
+        }
+        
+
+        fclose(fptr);
+    }else{
+        printf("Please input a wave file as an argument\n");
     }
     
-
-    fclose(fptr);
     printf("***Program is compleate***");
     return 0;
 }

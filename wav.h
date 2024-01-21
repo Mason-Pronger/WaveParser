@@ -1,22 +1,23 @@
 //includes
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 typedef struct WAV{ 
-    unsigned char ChunkID[4];    //The wave format spec says that chunkid is 4 bytes. However I need a null terminator char to print this value correctly
-    unsigned char ChunkSize[4];
-    unsigned char Format[4];     //Much like the ChunkId explanation, I need a null terminator character.
-    char Subchunk1Id[4];
-    char Subchunk1Size[4];
-    char AudioFormat[2];
-    char NumChannels[2];
-    char SampleRate[4];
-    char ByteRate[4];
-    char BlockAlign[2];
-    char BitsPerSample[4];
-    char Subchunk2Id[4];
-    char Subchunk2Size[4];
-    void *Data;
+    uint32_t ChunkID;    //The wave format spec says that chunkid is 4 bytes. However I need a null terminator char to print this value correctly
+    uint32_t ChunkSize;
+    uint32_t Format;     //Much like the ChunkId explanation, I need a null terminator character.
+    uint8_t Subchunk1Id[4];
+    uint8_t Subchunk1Size[4];
+    uint8_t AudioFormat[2];
+    uint8_t NumChannels[2];
+    uint8_t SampleRate[4];
+    uint8_t ByteRate[4];
+    uint8_t BlockAlign[2];
+    uint8_t BitsPerSample[4];
+    uint8_t Subchunk2Id[4];
+    uint8_t Subchunk2Size[4];
+    uint8_t *Data;
 }wave;
 #define ChunkOffset 4
 #define DescriptorSize 4
