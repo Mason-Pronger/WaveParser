@@ -77,13 +77,24 @@ int WAVECheck(FILE *File, wave *wav){
 }
 
 void WaveInformation(wave *wav, FILE *out){
-    //char *ChunkId=NULL,*Format=NULL;
-    uint32_t ChunkSize;
-    
+    char ChunkId[5],Format[5];
+    uint32_t ChunkSize = wav->ChunkSize;
+
+    snprintf(ChunkId, sizeof(ChunkId), "%c%c%c%c", 
+             (wav->ChunkID >> 24) & 0xFF,
+             (wav->ChunkID >> 16) & 0xFF,
+             (wav->ChunkID >> 8) & 0xFF,
+             wav->ChunkID & 0xFF);
+
+    snprintf(Format, sizeof(Format), "%c%c%c%c", 
+             (wav->Format >> 24) & 0xFF,
+             (wav->Format >> 16) & 0xFF,
+             (wav->Format >> 8) & 0xFF,
+             wav->Format & 0xFF);
 
     if(out == NULL){
-        //fprintf(stdout,"Chunk Id:%-8s\nChunk Size:%-8d\nFormat:%-8s\n",ChunkId,ChunkSize,Format);
-        printf("%u\n",ChunkSize);
+        fprintf(stdout,"Chunk Id:%-8s\nChunk Size:%-8d\nFormat:%-8s\n",ChunkId,ChunkSize,Format);
+        //printf("%u\n",ChunkSize);
     }
 }
 /*
