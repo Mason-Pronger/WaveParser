@@ -20,14 +20,14 @@ int PrintProper(char *incoming,char **destination,uint8_t size){
 */
 
 //Reverse the order of the endian
-uint32_t ReverseEndian(uint32_t *data,int size){
+uint32_t ReverseEndian(uint32_t data,int size){
     //This needs to be cleaned up and tested
     uint32_t Reversed;
 
-    Reversed =  ((*data>>24)&0xff) | // move byte 3 to byte 0
-                    ((*data<<8)&0xff0000) | // move byte 1 to byte 2
-                    ((*data>>8)&0xff00) | // move byte 2 to byte 1
-                    ((*data<<24)&0xff000000); // byte 0 to byte 3
+    Reversed =  ((data>>24)&0xff) | // move byte 3 to byte 0
+                    ((data<<8)&0xff0000) | // move byte 1 to byte 2
+                    ((data>>8)&0xff00) | // move byte 2 to byte 1
+                    ((data<<24)&0xff000000); // byte 0 to byte 3
 
     return Reversed;
 }
@@ -36,10 +36,12 @@ int RiffCheck(FILE *File,wave *wav){
     	int result = 0;
     
     	uint32_t buffer;
-    	fread(&buffer,sizeof(char),DescriptorSize,File);
-	    uint32_t ChunkId = 0x52494646;
+    	fread(&buffer,sizeof(uint8_t),DescriptorSize,File);
 
-    	result = buffer == ChunkId;//!strncmp(buffer,ChunkId,DescriptorSize);
+	    uint32_t ExpectedChunkId = 0x52494646;  //This is the hex representation of the asci letters "RIFF"
+
+        buffer = ReverseEndian(buffer,sizeof(uint32_t));
+    	result = buffer == ExpectedChunkId;
 
         memcpy(wav->ChunkID,buffer,DescriptorSize);
 
