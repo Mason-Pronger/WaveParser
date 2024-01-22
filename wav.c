@@ -51,22 +51,27 @@ int RiffCheck(FILE *File,wave *wav){
 int ChunkSize(FILE *File, wave *wav){
 	//ChunkSize is in little endian format
     uint8_t result = 0; //Assume the final result is false
-	char buffer[4];
-	result = fread(buffer,sizeof(char),4,File);
+	uint32_t buffer;
 
-    memcpy(wav->ChunkSize,buffer,sizeof(char)*DescriptorSize);
+
+	result = fread(&buffer,sizeof(uint32_t),1,File);
+
+    memcpy(&wav->ChunkSize,&buffer,sizeof(uint32_t));
     
     return (result != 0);
 }
 
 int WAVECheck(FILE *File, wave *wav){
 	uint8_t result;
-	char buffer[4];
-	fread(buffer,sizeof(char),DescriptorSize,File);
-	char *WAVEId = "WAVE";
-	result = !strncmp(buffer,WAVEId,DescriptorSize);
+	uint32_t buffer;
+	
+    fread(&buffer,sizeof(uint32_t),1,File);
+	uint32_t ExpectedWAVEId = "WAVE";
+    
+    buffer = ReverseEndian(buffer);
+	result = buffer == ExpectedWAVEId;
 
-    memcpy(wav->Format,buffer,DescriptorSize*sizeof(char));
+    memcpy(&wav->Format,&buffer,sizeof(uint32_t));
 
 	return result;
 }
@@ -74,9 +79,7 @@ int WAVECheck(FILE *File, wave *wav){
 void WaveInformation(wave *wav, FILE *out){
     //char *ChunkId=NULL,*Format=NULL;
     uint32_t ChunkSize;
-    //PrintProper(wav->ChunkID,&ChunkId,DescriptorSize);
-    //PrintProper(wav->Format,&Format,DescriptorSize);
-    ChunkSize = ReverseEndian(wav->ChunkSize);
+    
 
     if(out == NULL){
         //fprintf(stdout,"Chunk Id:%-8s\nChunk Size:%-8d\nFormat:%-8s\n",ChunkId,ChunkSize,Format);
