@@ -20,7 +20,7 @@ int PrintProper(char *incoming,char **destination,uint8_t size){
 */
 
 //Reverse the order of the endian
-uint32_t ReverseEndian(uint32_t data,int size){
+uint32_t ReverseEndian(uint32_t data){
     //This needs to be cleaned up and tested
     uint32_t Reversed;
 
@@ -40,10 +40,10 @@ int RiffCheck(FILE *File,wave *wav){
 
 	    uint32_t ExpectedChunkId = 0x52494646;  //This is the hex representation of the asci letters "RIFF"
 
-        buffer = ReverseEndian(buffer,sizeof(uint32_t));
+        buffer = ReverseEndian(buffer);
     	result = buffer == ExpectedChunkId;
 
-        memcpy(wav->ChunkID,buffer,DescriptorSize);
+        memcpy(&wav->ChunkID,&buffer,DescriptorSize);
 
     	return result;
 }
@@ -76,7 +76,7 @@ void WaveInformation(wave *wav, FILE *out){
     uint32_t ChunkSize;
     //PrintProper(wav->ChunkID,&ChunkId,DescriptorSize);
     //PrintProper(wav->Format,&Format,DescriptorSize);
-    ChunkSize = ReverseEndian(wav->ChunkSize,DescriptorSize);
+    ChunkSize = ReverseEndian(wav->ChunkSize);
 
     if(out == NULL){
         //fprintf(stdout,"Chunk Id:%-8s\nChunk Size:%-8d\nFormat:%-8s\n",ChunkId,ChunkSize,Format);
