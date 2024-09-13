@@ -7,12 +7,11 @@ int main(int argc, char const *argv[])
     FILE *fptr;
     wave header;
 
-    if(argc > 0){
-        fptr = fopen(argv[1],"rb");
+    if(argc > 1){
+        fptr = fopen(argv[2],"rb");
 
         if(fptr == NULL){
             printf("Unable to open file\n");
-
         }else{
             printf("successfully opened file\n");
             if(RiffCheck(fptr,&header)){
@@ -33,6 +32,6 @@ int main(int argc, char const *argv[])
         printf("Please input a wave file as an argument\n");
     }
     
-    printf("***Program is compleate***");
+    printf("***Program is compleate***\n");
     return 0;
 }

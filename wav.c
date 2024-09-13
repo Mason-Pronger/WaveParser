@@ -1,9 +1,5 @@
 #include "wav.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-
+#include <math.h>
 /*  This function does not work yet do not use.
 int PrintProper(char *incoming,char **destination,uint8_t size){
     uint8_t result = 0;
@@ -21,15 +17,7 @@ int PrintProper(char *incoming,char **destination,uint8_t size){
 
 //Reverse the order of the endian
 uint32_t ReverseEndian(uint32_t data){
-    //This needs to be cleaned up and tested
-    uint32_t Reversed;
-
-    Reversed =  ((data>>24)&0xff) | // move byte 3 to byte 0
-                    ((data<<8)&0xff0000) | // move byte 1 to byte 2
-                    ((data>>8)&0xff00) | // move byte 2 to byte 1
-                    ((data<<24)&0xff000000); // byte 0 to byte 3
-
-    return Reversed;
+    return ntohl(data);
 }
 
 int RiffCheck(FILE *File,wave *wav){
@@ -50,15 +38,15 @@ int RiffCheck(FILE *File,wave *wav){
 
 int ChunkSize(FILE *File, wave *wav){
 	//ChunkSize is in little endian format
-    uint8_t result = 0; //Assume the final result is false
+    uint8_t result = 1; //Assume the final result is failed
 	uint32_t buffer;
 
 
 	result = fread(&buffer,sizeof(uint32_t),1,File);
 
-    memcpy(&wav->ChunkSize,&buffer,sizeof(uint32_t));
+    memcpy(&wav->ChunkSize,&buffer,sizeof(wav->ChunkSize));
     
-    return (result != 0);
+    return result;
 }
 
 int WAVECheck(FILE *File, wave *wav){
@@ -97,14 +85,85 @@ void WaveInformation(wave *wav, FILE *out){
         //printf("%u\n",ChunkSize);
     }
 }
-/*
-int openwave(void *File, wave *header){
-    int read = 0;
-    
-    read = fread(header->ChunkID, sizeof(header->ChunkID),1,File);
-    printf("(1-4): %s n", header->ChunkID);
-    
-    return 0;
-}
-*/
 
+int openwave(FILE *File, wave *header){
+	int read = 0;
+
+	// Read the RIFF chunk descriptor
+	read = fread(&header->ChunkID, sizeof(header->ChunkID), 1, File);
+	if (read != 1) {
+		printf("Error reading ChunkID\n");
+		return -1;
+	}
+
+	read = fread(&header->ChunkSize, sizeof(header->ChunkSize), 1, File);
+	if (read != 1) {
+		printf("Error reading ChunkSize\n");
+		return -1;
+	}
+
+	read = fread(&header->Format, sizeof(header->Format), 1, File);
+	if (read != 1) {
+		printf("Error reading Format\n");
+		return -1;
+	}
+
+	// Print the information
+	WaveInformation(header, stdout);
+
+	return 0;
+}
+
+
+
+int createSineWave(FILE *File, wave *wav, uint32_t frequency, uint32_t duration, uint32_t sampleRate, uint16_t bitsPerSample, uint16_t numChannels) {
+	uint32_t numSamples = sampleRate * duration;
+	uint32_t dataSize = numSamples * numChannels * (bitsPerSample / 8);
+
+	// Allocate memory for the data
+	wav->Data = (uint8_t *)malloc(dataSize);
+	if (wav->Data == NULL) {
+		printf("Memory allocation failed\n");
+		return -1;
+	}
+
+	// Generate the sine wave
+	for (uint32_t i = 0; i < numSamples; i++) {
+		double t = (double)i / sampleRate;
+		double sample = sin(2.0 * M_PI * frequency * t);
+
+		// Scale the sample to the appropriate range
+		int16_t intSample = (int16_t)(sample * 32767);
+
+		// Write the sample to the data buffer
+		for (uint16_t channel = 0; channel < numChannels; channel++) {
+			memcpy(&wav->Data[(i * numChannels + channel) * (bitsPerSample / 8)], &intSample, sizeof(int16_t));
+		}
+	}
+
+	// Write the WAV header
+	fwrite("RIFF", 1, 4, File);
+	uint32_t chunkSize = 36 + dataSize;
+	fwrite(&chunkSize, 4, 1, File);
+	fwrite("WAVE", 1, 4, File);
+	fwrite("fmt ", 1, 4, File);
+	uint32_t subchunk1Size = 16;
+	fwrite(&subchunk1Size, 4, 1, File);
+	uint16_t audioFormat = 1;
+	fwrite(&audioFormat, 2, 1, File);
+	fwrite(&numChannels, 2, 1, File);
+	fwrite(&sampleRate, 4, 1, File);
+	uint32_t byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+	fwrite(&byteRate, 4, 1, File);
+	uint16_t blockAlign = numChannels * (bitsPerSample / 8);
+	fwrite(&blockAlign, 2, 1, File);
+	fwrite(&bitsPerSample, 2, 1, File);
+	fwrite("data", 1, 4, File);
+	fwrite(&dataSize, 4, 1, File);
+	fwrite(wav->Data, 1, dataSize, File);
+
+	// Free the allocated memory
+	free(wav->Data);
+
+	return 0;
+}
